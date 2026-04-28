@@ -104,16 +104,16 @@ const Ruleta = memo(({ mustSpin, prizeNumber, data, onStopSpinning }) => {
         "#FFE9C7",
       ]}
       textColors={["#1B3A2A"]}
-      fontSize={28}
-      outerBorderWidth={5}
+      fontSize={42}
+      outerBorderWidth={8}
       outerBorderColor={"#C59B27"}
       radiusLineWidth={0}
       radiusLineColor={"transparent"}
-      innerRadius={26}
+      innerRadius={45}
       innerBorderColor={"transparent"}
       innerBorderWidth={0}
       perpendicularText={false}
-      textDistance={62}
+      textDistance={100}
     />
   );
 });
@@ -193,17 +193,15 @@ const HomePage = () => {
   const [historial, setHistorial] = useState([]);
   const [eventoActivo, setEventoActivo] = useState(null);
   const [error, setError] = useState(null);
-  // El countdown se manejará localmente en el componente del cartel para no re-renderizar todo
-
 
   const audioRef = useRef(new Audio(tickSound));
   const winSoundRef = useRef(new Audio(winSound));
   const nombreRef = useRef(null);
   const isSpinningRef = useRef(false);
   const registeringRef = useRef(false);
+  const isFetchingRef = useRef(false);
   const navigate = useNavigate();
 
-  // Sincronizar el ref con el estado
   useEffect(() => {
     isSpinningRef.current = mustSpin;
   }, [mustSpin]);
@@ -214,14 +212,9 @@ const HomePage = () => {
     winSoundRef.current.volume = 0.6;
   }, []);
 
-  // El efecto de nombres aleatorios ahora vive en el componente OverlayGanador
-
-
   useEffect(() => {
     fetchData();
   }, []);
-
-  const isFetchingRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     if (isFetchingRef.current) return;
@@ -256,6 +249,8 @@ const HomePage = () => {
       } else {
         setError("Error al cargar datos del sistema.");
       }
+    } finally {
+      isFetchingRef.current = false;
     }
   }, []);
 
@@ -273,15 +268,12 @@ const HomePage = () => {
     if (registeringRef.current) return;
     registeringRef.current = true;
     
-    console.log("¡Registrando ganador!");
     const seleccionado = funcionarios[prizeNumber];
 
     if (seleccionado && eventoActivo) {
-      // Detener el ciclo de nombres aleatorios y el giro
       isSpinningRef.current = false;
       setMustSpin(false);
 
-      // Sincronizar el nombre inmediatamente
       if (nombreRef.current) {
         nombreRef.current.innerText = seleccionado.nombre_completo;
       }
@@ -316,12 +308,10 @@ const HomePage = () => {
     audioRef.current.currentTime = 0;
   }, [prizeNumber, funcionarios, eventoActivo, fetchData]);
 
-  // Seguridad extra: Si la ruleta no se detiene sola en 11.5 segundos, forzamos el fin del proceso
   useEffect(() => {
     if (mustSpin) {
       const timer = setTimeout(() => {
         if (isSpinningRef.current) {
-          console.warn("Fallback: Forzando el registro del ganador.");
           registrarGanador();
         }
       }, 11500);
