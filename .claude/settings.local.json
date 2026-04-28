@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:\\\\Users\\\\iset.COOPREDUCTO\\\\Desktop\\\\Pc Antiguo\\\\Desktop\\\\Apps\\\\Ruleta\" status)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}

@@ -1,0 +1,548 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #aab1a0, #7f9e8a);
+
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+
+.ruleta-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  
+}
+
+.girar-btn {
+  background: linear-gradient(145deg, #facc15, #fbbf24);
+  color: #111;
+  font-weight: 600;
+  font-size: 1.25rem;
+  padding: 0.9rem 2.2rem;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.girar-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+
+.ganador-box {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tabla-historial {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  width: 95%;
+  max-width: 1000px;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.tabla-historial h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+
+.tabla-historial table {
+  width: 100%;
+  border-collapse: collapse;
+  color: white;
+}
+
+.tabla-historial th {
+  font-size: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.tabla-historial td {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.main-flex {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 3rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.lista-participantes {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  min-width: 280px;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.lista-participantes h3 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.lista-participantes ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-participantes li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  backdrop-filter: blur(4px);
+}
+
+.modal-ganador {
+  background: linear-gradient(135deg, #1e40af, #6d28d9);
+  border: 4px solid #facc15;
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  animation: aparecer 0.5s ease-out;
+  color: white;
+  max-width: 90%;
+  width: 400px;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.modal-ganador h2.brillante {
+  font-size: 2.5rem;
+  color: #facc15;
+  text-shadow: 0 0 10px #facc15, 0 0 20px #fff;
+  animation: pulse 1.5s infinite alternate;
+}
+
+.nombre-ganador {
+  font-size: 1.75rem;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.ci-ganador {
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  color: #d1d5db;
+}
+
+.cerrar-btn {
+  margin-top: 2rem;
+  padding: 0.7rem 1.5rem;
+  background-color: #facc15;
+  color: #111;
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.cerrar-btn:hover {
+  background-color: #fde047;
+}
+
+@keyframes aparecer {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  from {
+    text-shadow: 0 0 10px #facc15;
+  }
+  to {
+    text-shadow: 0 0 20px #facc15, 0 0 40px #fff;
+  }
+}
+
+.ruleta-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ruleta-container canvas {
+  width: 500px !important;
+  height: 500px !important;
+  max-width: 90vw;
+  max-height: 90vw;
+}
+
+
+.ruleta-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.imagen-centro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 10;
+}
+.nombre-dinamico {
+  height: 40px; /* ✅ espacio reservado fijo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.nombre-dinamico h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 6px 16px;
+  border-radius: 12px;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+
+.nombre-dinamico-overlay {
+  position: absolute;
+  top: -50px; /* puedes ajustar esto */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 15px;
+  z-index: 20;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.nombre-dinamico-overlay h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+  white-space: nowrap;
+  text-shadow: 1px 1px 3px black;
+}
+
+/* Estilos adicionales para el nuevo sistema */
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.header-bar {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.header-bar h1 {
+  margin: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.evento-badge {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 20px;
+}
+
+.admin-link-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.admin-link-btn:hover {
+  background: white;
+  color: #667eea;
+}
+
+/* ========================================
+   ESTADO DE ERROR / SIN EVENTO ACTIVO
+   ======================================== */
+
+.error-state-container {
+  background: white;
+  padding: 60px 40px;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  animation: errorFadeIn 0.6s ease-out;
+}
+
+@keyframes errorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ícono de Error */
+.error-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.error-icon-circle {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: errorPulse 2s ease-in-out infinite;
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+}
+
+@keyframes errorPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(251, 191, 36, 0.4);
+  }
+}
+
+.error-icon {
+  width: 70px;
+  height: 70px;
+  color: #f59e0b;
+  stroke-width: 2.5;
+}
+
+/* Contenido del Error */
+.error-content {
+  margin-bottom: 40px;
+}
+
+.error-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 15px 0;
+  line-height: 1.2;
+}
+
+.error-message {
+  font-size: 18px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Acciones del Error */
+.error-actions {
+  margin-bottom: 30px;
+}
+
+.error-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 18px 36px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.error-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.error-btn-primary:active {
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.5;
+}
+
+/* Footer del Error */
+.error-footer {
+  padding-top: 30px;
+  border-top: 2px solid #f3f4f6;
+}
+
+.error-hint {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.error-hint strong {
+  color: #1f2937;
+}
+
+/* Responsive para estado de error */
+@media (max-width: 768px) {
+  .error-state-container {
+    padding: 40px 30px;
+    max-width: 90%;
+  }
+
+  .error-icon-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .error-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .error-title {
+    font-size: 26px;
+  }
+
+  .error-message {
+    font-size: 16px;
+  }
+
+  .error-btn-primary {
+    padding: 16px 28px;
+    font-size: 16px;
+  }
+
+  .error-hint {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* Mantener compatibilidad con error-container antiguo */
+.error-container {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 600px;
+}
+
+.error-container h1 {
+  color: #ef4444;
+  margin-bottom: 20px;
+}
+
+.no-funcionarios {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+}
+
+.no-funcionarios p {
+  font-size: 18px;
+  color: #6b7280;
+  margin: 0;
+}
+
+
