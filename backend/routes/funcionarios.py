@@ -366,6 +366,10 @@ def upload_directivos():
             db.session.add(sucursal)
             db.session.commit()
             
+        # Limpiar directivos anteriores para evitar duplicados y limpiar formatos viejos
+        Funcionario.query.filter_by(tipo='directivo').delete()
+        db.session.commit()
+            
         added = 0
         updated = 0
         current_group = "DIRECTIVO"
