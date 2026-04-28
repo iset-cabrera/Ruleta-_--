@@ -193,6 +193,7 @@ const HomePage = () => {
   const [historial, setHistorial] = useState([]);
   const [eventoActivo, setEventoActivo] = useState(null);
   const [error, setError] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   const audioRef = useRef(new Audio(tickSound));
   const winSoundRef = useRef(new Audio(winSound));
@@ -363,7 +364,11 @@ const HomePage = () => {
 
   return (
     <div className="app-container">
-      <div className="header-bar">
+      <button className={`admin-toggle-btn ${showAdmin ? 'active' : ''}`} onClick={() => setShowAdmin(!showAdmin)} title="Panel de Administración">
+        {showAdmin ? '✕' : '⚙️'}
+      </button>
+
+      <div className={`header-bar ${showAdmin ? 'show' : 'hide'}`}>
         <h1>Ruleta de Sorteo</h1>
         {eventoActivo && (
           <div className="evento-badge">
@@ -427,7 +432,7 @@ const HomePage = () => {
           </div>
 
           <button className="girar-btn" onClick={handleSpinClick}>
-            ¡ Girar Ruleta !
+            GIRAR
           </button>
         </div>
       )}
