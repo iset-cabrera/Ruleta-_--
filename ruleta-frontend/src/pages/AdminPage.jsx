@@ -257,10 +257,30 @@ const AdminPage = () => {
       const res = await api.post('/api/funcionarios/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      alert(res.data.message || 'Carga completada');
+      alert(res.data.message || 'Carga de funcionarios completada');
       cargarDatos();
     } catch (error) {
       alert(error.response?.data?.error || 'Error al procesar el archivo Excel');
+    } finally {
+      setLoading(false);
+      e.target.value = null;
+    }
+  };
+
+  const handleDirectivosUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    setLoading(true);
+    try {
+      const res = await api.post('/api/funcionarios/upload_directivos', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      alert(res.data.message || 'Carga de directivos completada');
+      cargarDatos();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Error al procesar el archivo de directivos');
     } finally {
       setLoading(false);
       e.target.value = null;
@@ -513,8 +533,12 @@ const AdminPage = () => {
                     <h1>Gestión de Funcionarios</h1>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <label className="btn-upload">
-                        <IconUpload /> Carga Masiva (Excel)
+                        <IconUpload /> Carga Funcionarios
                         <input type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleFileUpload} />
+                      </label>
+                      <label className="btn-upload" style={{ backgroundColor: '#1b3a2a' }}>
+                        <IconUpload /> Carga Directivos
+                        <input type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleDirectivosUpload} />
                       </label>
                       <button
                         className="btn-primary"

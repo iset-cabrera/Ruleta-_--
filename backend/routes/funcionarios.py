@@ -343,6 +343,93 @@ def upload_excel():
         return jsonify({'error': f'Error procesando excel: {str(e)}'}), 500
 
 
+@funcionarios_bp.route('/funcionarios/upload_directivos', methods=['POST'])
+@jwt_required()
+def upload_directivos():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No se proporcionó ningún archivo'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
+    
+    try:
+        content = file.read()
+        # Read without header to process custom structure
+        df = pd.read_excel(io.BytesIO(content), header=None)
+        
+        # Ensure 'DIRECTIVOS' sucursal exists
+        sucursal = Sucursal.query.filter_by(sucursal_nombre='DIRECTIVOS').first()
+        if not sucursal:
+            # Find next code
+            max_code = db.session.query(func.max(Sucursal.sucursal_codigo)).scalar() or 0
+            sucursal = Sucursal(sucursal_codigo=max_code + 1, sucursal_nombre='DIRECTIVOS')
+            db.session.add(sucursal)
+            db.session.commit()
+            
+        added = 0
+        updated = 0
+        current_group = "DIRECTIVO"
+        
+        for i, row in df.iterrows():
+            val_a = str(row[0]).strip().upper() if not pd.isna(row[0]) else ""
+            val_b = str(row[1]).strip().upper() if not pd.isna(row[1]) else ""
+            
+            # Detect group headers (usually green background in screenshot, but we see the text)
+            # Headers like "CONSEJO ADMINISTRATIVO", "JUNTA DE VIGILANCIA", etc.
+            # They usually don't have a number in column A or have 'TOTALES'
+            
+            if "TOTALES" in val_a or "TOTALES" in val_b:
+                continue
+                
+            # If Column B has text but Column A is empty or contains non-numeric header text
+            if val_b and not val_a.replace('.', '').isdigit():
+                # Potential header
+                if val_b not in ["NOMBRE Y APELLIDO", "DIETA FEBRERO 2026"]:
+                    current_group = val_b
+                continue
+                
+            # Data row: Column A is numeric (Socio No)
+            socio_raw = val_a.replace('.', '')
+            if socio_raw.isdigit() and val_b:
+                socio_no = int(socio_raw)
+                nombre = val_b
+                
+                # For directivos, we'll use Socio No as CI (prefixed) if CI is unknown
+                # But to keep it consistent with the system, we'll use the Socio No as CI directly
+                # assuming they won't collide or just use "DIR_" prefix
+                ci_str = f"D_{socio_no}"
+                
+                func_obj = Funcionario.query.get(ci_str)
+                if func_obj:
+                    func_obj.nombre_completo = nombre
+                    func_obj.socio_numero = socio_no
+                    func_obj.cargo = current_group
+                    func_obj.tipo = 'directivo'
+                    func_obj.activo = True
+                    updated += 1
+                else:
+                    nuevo = Funcionario(
+                        cedula=ci_str,
+                        nombre_completo=nombre,
+                        sucursal_codigo=sucursal.sucursal_codigo,
+                        socio_numero=socio_no,
+                        cargo=current_group,
+                        tipo='directivo',
+                        activo=True
+                    )
+                    db.session.add(nuevo)
+                    added += 1
+                    
+        db.session.commit()
+        return jsonify({'message': f'Carga de directivos exitosa. Agregados: {added}, Actualizados: {updated}'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({'error': f'Error procesando excel de directivos: {str(e)}'}), 500
+
+
 @funcionarios_bp.route('/funcionarios/stats', methods=['GET'])
 @jwt_required()
 def obtener_estadisticas():

@@ -104,7 +104,7 @@ const Ruleta = memo(({ mustSpin, prizeNumber, data, onStopSpinning }) => {
         "#FFE9C7",
       ]}
       textColors={["#1B3A2A"]}
-      fontSize={1}
+      fontSize={28}
       outerBorderWidth={5}
       outerBorderColor={"#C59B27"}
       radiusLineWidth={0}

@@ -425,12 +425,12 @@
   50%       { transform: translateY(-4px); }
 }
 
-/* Tamaño moderado de la ruleta — caben los nombres */
+/* Tamaño grande para proyección */
 .ruleta-wrapper canvas {
-  width: 540px !important;
-  height: 540px !important;
-  max-width: 88vw;
-  max-height: 88vw;
+  width: 800px !important;
+  height: 800px !important;
+  max-width: 90vw;
+  max-height: 90vw;
   border-radius: 50%;
 }
 
