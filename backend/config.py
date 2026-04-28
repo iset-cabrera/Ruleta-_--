@@ -7,7 +7,7 @@ class Config:
     # Base de datos
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
-        'postgresql://postgres:R3duct02025**//@localhost:5432/sorteos'
+        'sqlite:///sorteos.db'
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     

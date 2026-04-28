@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // 🔧 URL base desde variable de entorno
-export const API_URL = import.meta.env.VITE_API_URL || "http://192.168.10.10:2000";
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:2000";
 
 // 🌐 Instancia de axios configurada
 export const api = axios.create({

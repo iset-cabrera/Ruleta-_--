@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "opencode": "opencode --port 27174"
+  },
   "dependencies": {
     "axios": "^1.8.4",
     "react-wheel-of-prizes": "^1.1.0"

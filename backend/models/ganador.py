@@ -1,9 +1,10 @@
-from . import db
+from sqlalchemy.orm import validates
+from . import db, normalizar_nombre
 from datetime import datetime
 
 class Ganador(db.Model):
     __tablename__ = 'ganadores'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     ci = db.Column(db.String(15), nullable=False)
     nombre_completo = db.Column(db.String(255), nullable=False)
@@ -12,10 +13,14 @@ class Ganador(db.Model):
     fecha_hora_ganado = db.Column(db.DateTime, default=datetime.now, nullable=False)
     concepto = db.Column(db.String(100))
     evento_id = db.Column(db.Integer, db.ForeignKey('eventos.id'))
-    
+
     # Relaciones
     sucursal = db.relationship('Sucursal', backref='ganadores')
     evento = db.relationship('Evento', backref='ganadores')
+
+    @validates('nombre_completo', 'concepto')
+    def _normalizar_a_mayusculas(self, key, value):
+        return normalizar_nombre(value)
     
     def to_dict(self):
         return {

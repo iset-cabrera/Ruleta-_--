@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from models import db, Ganador, Funcionario, Sucursal, Evento
 from sqlalchemy import select, join
 from datetime import datetime
@@ -103,10 +104,50 @@ def registrar_ganador():
     
     db.session.add(nuevo_ganador)
     db.session.commit()
-    
+
     return jsonify({
         "status": "ok",
         "message": "Ganador registrado exitosamente",
         "ganador": nuevo_ganador.to_dict()
     }), 201
+
+
+@ganadores_bp.route('/ganadores/reset', methods=['DELETE'])
+@jwt_required()
+def reset_ganadores():
+    """Eliminar ganadores (todos o por evento). Para pruebas/admin."""
+    evento_id = request.args.get('evento_id', type=int)
+
+    query = Ganador.query
+    if evento_id:
+        evento = Evento.query.get(evento_id)
+        if not evento:
+            return jsonify({'error': 'Evento no encontrado'}), 404
+        query = query.filter_by(evento_id=evento_id)
+
+    eliminados = query.delete(synchronize_session=False)
+    db.session.commit()
+
+    return jsonify({
+        'status': 'ok',
+        'message': f'{eliminados} ganador(es) eliminado(s) exitosamente',
+        'eliminados': eliminados
+    })
+
+
+@ganadores_bp.route('/ganadores/<int:ganador_id>', methods=['DELETE'])
+@jwt_required()
+def eliminar_ganador(ganador_id):
+    """Eliminar un ganador específico por ID."""
+    ganador = Ganador.query.get(ganador_id)
+    if not ganador:
+        return jsonify({'error': 'Ganador no encontrado'}), 404
+
+    db.session.delete(ganador)
+    db.session.commit()
+
+    return jsonify({
+        'status': 'ok',
+        'message': 'Ganador eliminado exitosamente'
+    })
 

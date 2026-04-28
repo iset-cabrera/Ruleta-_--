@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from models import db, Funcionario, Sucursal, Ganador
+from models import db, Funcionario, Sucursal, Ganador, normalizar_nombre
 from sqlalchemy import select, join, func
+import pandas as pd
+import io
 
 funcionarios_bp = Blueprint('funcionarios', __name__)
 
@@ -23,6 +25,11 @@ def obtener_funcionarios():
         Funcionario.sucursal_codigo,
         Sucursal.sucursal_nombre,
         Funcionario.socio_numero,
+        Funcionario.cumpleanos,
+        Funcionario.fecha_ingreso,
+        Funcionario.cargo,
+        Funcionario.nomina,
+        Funcionario.plus,
         Funcionario.activo,
         Funcionario.tipo,
         Funcionario.fecha_creacion
@@ -52,6 +59,11 @@ def obtener_funcionarios():
             "sucursal_codigo": r.sucursal_codigo,
             "sucursal_nombre": r.sucursal_nombre,
             "socio_numero": r.socio_numero,
+            "cumpleanos": r.cumpleanos,
+            "fecha_ingreso": r.fecha_ingreso,
+            "cargo": r.cargo,
+            "nomina": r.nomina,
+            "plus": r.plus,
             "activo": r.activo,
             "tipo": r.tipo,
             "fecha_creacion": r.fecha_creacion.strftime("%Y-%m-%d %H:%M:%S") if r.fecha_creacion else None
@@ -188,6 +200,147 @@ def obtener_sucursales():
     """Obtener todas las sucursales"""
     sucursales = Sucursal.query.all()
     return jsonify([s.to_dict() for s in sucursales])
+
+
+@funcionarios_bp.route('/funcionarios/upload', methods=['POST'])
+@jwt_required()
+def upload_excel():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No se proporcionó ningún archivo'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
+    
+    try:
+        content = file.read()
+        xl = pd.ExcelFile(io.BytesIO(content))
+        
+        sucursales_db = {normalizar_nombre(s.sucursal_nombre): s for s in Sucursal.query.all()}
+        next_sucursal_codigo = max([s.sucursal_codigo for s in sucursales_db.values()] + [0]) + 1
+        
+        added = 0
+        updated = 0
+        
+        for sheet in xl.sheet_names:
+            df = xl.parse(sheet, header=None)
+            
+            header_row_idx = -1
+            for i, row in df.iterrows():
+                if 'CI' in row.values:
+                    header_row_idx = i
+                    break
+                    
+            if header_row_idx == -1:
+                continue
+                
+            headers = df.iloc[header_row_idx].tolist()
+            ci_idx = headers.index('CI')
+            socio_idx = headers.index('Nº DE SOCIO') if 'Nº DE SOCIO' in headers else -1
+            
+            # Find indices for extra columns
+            def find_col(name):
+                for idx, h in enumerate(headers):
+                    if isinstance(h, str) and name in h.upper():
+                        return idx
+                return -1
+                
+            nombre_idx = find_col('NOMBRE Y APELLIDO')
+            cumpleanos_idx = find_col('CUMPLEAÑOS')
+            ingreso_idx = find_col('INGRESO')
+            cargo_idx = find_col('CARGO')
+            nomina_idx = find_col('NOMINA')
+            plus_idx = find_col('PLUS')
+            
+            if ci_idx == -1 or nombre_idx == -1:
+                continue
+                
+            sucursal_nombre = normalizar_nombre(sheet)
+            if not sucursal_nombre:
+                continue
+            if sucursal_nombre not in sucursales_db:
+                nueva_sucursal = Sucursal(sucursal_codigo=next_sucursal_codigo, sucursal_nombre=sucursal_nombre)
+                db.session.add(nueva_sucursal)
+                sucursales_db[sucursal_nombre] = nueva_sucursal
+                next_sucursal_codigo += 1
+
+            sucursal = sucursales_db[sucursal_nombre]
+            
+            for i in range(header_row_idx + 1, len(df)):
+                row = df.iloc[i]
+                ci_val = row.iloc[ci_idx]
+                if pd.isna(ci_val):
+                    continue
+                    
+                ci_str = str(ci_val).replace('.', '').strip()
+                try:
+                    ci_str = str(int(float(ci_str))) # handle 12345.0
+                except:
+                    pass
+                if not ci_str or ci_str == 'nan':
+                    continue
+                    
+                nombre = str(row.iloc[nombre_idx]).strip()
+                if pd.isna(row.iloc[nombre_idx]) or nombre == 'nan':
+                    continue
+
+                socio = 0
+                if socio_idx != -1 and not pd.isna(row.iloc[socio_idx]):
+                    try:
+                        socio = int(float(str(row.iloc[socio_idx]).replace('.', '')))
+                    except:
+                        pass
+                        
+                def get_val(idx):
+                    if idx != -1 and not pd.isna(row.iloc[idx]):
+                        val = row.iloc[idx]
+                        if isinstance(val, pd.Timestamp):
+                            return val.strftime('%d/%m/%Y')
+                        return str(val).strip()
+                    return None
+
+                cumpleanos = get_val(cumpleanos_idx)
+                ingreso = get_val(ingreso_idx)
+                cargo = get_val(cargo_idx)
+                nomina = get_val(nomina_idx)
+                plus = get_val(plus_idx)
+                
+                func_obj = Funcionario.query.get(ci_str)
+                if func_obj:
+                    func_obj.nombre_completo = nombre
+                    func_obj.sucursal_codigo = sucursal.sucursal_codigo
+                    func_obj.socio_numero = socio
+                    func_obj.cumpleanos = cumpleanos
+                    func_obj.fecha_ingreso = ingreso
+                    func_obj.cargo = cargo
+                    func_obj.nomina = nomina
+                    func_obj.plus = plus
+                    func_obj.activo = True
+                    updated += 1
+                else:
+                    nuevo = Funcionario(
+                        cedula=ci_str,
+                        nombre_completo=nombre,
+                        sucursal_codigo=sucursal.sucursal_codigo,
+                        socio_numero=socio,
+                        cumpleanos=cumpleanos,
+                        fecha_ingreso=ingreso,
+                        cargo=cargo,
+                        nomina=nomina,
+                        plus=plus,
+                        activo=True,
+                        tipo='funcionario'
+                    )
+                    db.session.add(nuevo)
+                    added += 1
+                    
+        db.session.commit()
+        return jsonify({'message': f'Carga exitosa. Agregados: {added}, Actualizados: {updated}'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({'error': f'Error procesando excel: {str(e)}'}), 500
 
 
 @funcionarios_bp.route('/funcionarios/stats', methods=['GET'])
