@@ -465,7 +465,9 @@ const HomePage = () => {
 
               <div className="celebration-sucursal">{ganador.sucursal}</div>
               <p className="nombre-ganador celebration-name">{ganador.nombre_completo}</p>
-              <p className="ci-ganador">CI: {ganador.ci}</p>
+              <p className="ci-ganador">
+                {ganador.sucursal === 'DIRECTIVO' || ganador.sucursal === 'DIRECTIVOS' ? 'Nro de Socio' : 'CI'}: {ganador.ci}
+              </p>
 
               <button
                 className="cerrar-btn"
@@ -488,8 +490,7 @@ const HomePage = () => {
             <thead>
               <tr>
                 <th>Nombre</th>
-                <th>CI</th>
-                <th>N° Socio</th>
+                <th>CI / Socio</th>
                 <th>Sucursal</th>
                 <th>Fecha</th>
               </tr>
@@ -499,7 +500,6 @@ const HomePage = () => {
                 <tr key={i}>
                   <td>{g.nombre_completo}</td>
                   <td>{g.ci}</td>
-                  <td>{g.socio_numero}</td>
                   <td>{g.sucursal}</td>
                   <td>{g.fecha}</td>
                 </tr>

@@ -357,12 +357,12 @@ def upload_directivos():
         # Read without header to process custom structure
         df = pd.read_excel(io.BytesIO(content), header=None)
         
-        # Ensure 'DIRECTIVOS' sucursal exists
-        sucursal = Sucursal.query.filter_by(sucursal_nombre='DIRECTIVOS').first()
+        # Ensure 'DIRECTIVO' sucursal exists
+        sucursal = Sucursal.query.filter_by(sucursal_nombre='DIRECTIVO').first()
         if not sucursal:
             # Find next code
             max_code = db.session.query(func.max(Sucursal.sucursal_codigo)).scalar() or 0
-            sucursal = Sucursal(sucursal_codigo=max_code + 1, sucursal_nombre='DIRECTIVOS')
+            sucursal = Sucursal(sucursal_codigo=max_code + 1, sucursal_nombre='DIRECTIVO')
             db.session.add(sucursal)
             db.session.commit()
             
