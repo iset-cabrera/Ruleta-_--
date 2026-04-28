@@ -16,7 +16,7 @@ const LightsRing = memo(() => {
           key={i}
           className="light-bulb"
           style={{
-            transform: `rotate(${(i * 360) / count}deg) translateY(-285px)`,
+            transform: `rotate(${(i * 360) / count}deg) translateY(-400px)`,
             animationDelay: `${(i % 4) * 0.18}s`,
           }}
         />
@@ -200,6 +200,7 @@ const HomePage = () => {
   const winSoundRef = useRef(new Audio(winSound));
   const nombreRef = useRef(null);
   const isSpinningRef = useRef(false);
+  const registeringRef = useRef(false);
   const navigate = useNavigate();
 
   // Sincronizar el ref con el estado
@@ -264,11 +265,15 @@ const HomePage = () => {
     setPrizeNumber(index);
     setMustSpin(true);
     setGanador(null);
+    registeringRef.current = false;
     audioRef.current.play();
   };
 
   const registrarGanador = useCallback(() => {
-    console.log("Callback onStopSpinning ejecutado!");
+    if (registeringRef.current) return;
+    registeringRef.current = true;
+    
+    console.log("¡Registrando ganador!");
     const seleccionado = funcionarios[prizeNumber];
 
     if (seleccionado && eventoActivo) {

@@ -394,10 +394,8 @@ def upload_directivos():
                 socio_no = int(socio_raw)
                 nombre = val_b
                 
-                # For directivos, we'll use Socio No as CI (prefixed) if CI is unknown
-                # But to keep it consistent with the system, we'll use the Socio No as CI directly
-                # assuming they won't collide or just use "DIR_" prefix
-                ci_str = f"D_{socio_no}"
+                # Use socio number as CI directly as string
+                ci_str = str(socio_no)
                 
                 func_obj = Funcionario.query.get(ci_str)
                 if func_obj:
