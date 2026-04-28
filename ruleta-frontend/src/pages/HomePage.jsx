@@ -194,6 +194,7 @@ const HomePage = () => {
   const [eventoActivo, setEventoActivo] = useState(null);
   const [error, setError] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [duplicateWinner, setDuplicateWinner] = useState(null); // Nuevo estado para duplicados
 
   const audioRef = useRef(new Audio(tickSound));
   const winSoundRef = useRef(new Audio(winSound));
@@ -265,11 +266,11 @@ const HomePage = () => {
     audioRef.current.play();
   };
 
-  const registrarGanador = useCallback(() => {
-    if (registeringRef.current) return;
+  const registrarGanador = useCallback((force = false) => {
+    if (registeringRef.current && !force) return;
     registeringRef.current = true;
     
-    const seleccionado = funcionarios[prizeNumber];
+    const seleccionado = force ? duplicateWinner : funcionarios[prizeNumber];
 
     if (seleccionado && eventoActivo) {
       isSpinningRef.current = false;
@@ -287,8 +288,10 @@ const HomePage = () => {
           socio_numero: seleccionado.socio_numero,
           concepto: eventoActivo.nombre,
           evento_id: eventoActivo.id,
+          force: force, // Pasamos el flag de override
         })
         .then(() => {
+          setDuplicateWinner(null);
           if (!ganador) {
             setTimeout(() => {
               winSoundRef.current.play();
@@ -298,7 +301,10 @@ const HomePage = () => {
           }
         })
         .catch((err) => {
-          if (err.response?.status === 400) {
+          registeringRef.current = false;
+          if (err.response?.data?.type === 'DUPLICATE_WINNER') {
+            setDuplicateWinner(seleccionado);
+          } else if (err.response?.status === 400) {
             alert(err.response.data.message);
           } else {
             console.error("Error al registrar ganador", err);
@@ -307,7 +313,7 @@ const HomePage = () => {
     }
     audioRef.current.pause();
     audioRef.current.currentTime = 0;
-  }, [prizeNumber, funcionarios, eventoActivo, fetchData]);
+  }, [prizeNumber, funcionarios, eventoActivo, fetchData, duplicateWinner, ganador]);
 
   useEffect(() => {
     if (mustSpin) {
@@ -440,6 +446,36 @@ const HomePage = () => {
       {funcionarios.length === 0 && eventoActivo && (
         <div className="no-funcionarios">
           <p>No hay participantes disponibles para este evento.</p>
+        </div>
+      )}
+
+      {duplicateWinner && (
+        <div className="modal-overlay duplicate-overlay">
+          <div className="modal-ganador duplicate-modal">
+            <div className="duplicate-icon">🔄</div>
+            <h2 className="duplicate-title">¡Repetición Detectada!</h2>
+            <p className="duplicate-message">
+              <strong>{duplicateWinner.nombre_completo}</strong> ya ganó anteriormente en este evento.
+            </p>
+            <div className="duplicate-actions">
+              <button 
+                className="btn-secondary" 
+                onClick={() => {
+                  setDuplicateWinner(null);
+                  setPrizeNumber(-1);
+                  registeringRef.current = false;
+                }}
+              >
+                Volver a Girar
+              </button>
+              <button 
+                className="btn-primary" 
+                onClick={() => registrarGanador(true)}
+              >
+                Le damos el premio
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

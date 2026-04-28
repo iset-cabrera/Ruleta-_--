@@ -78,8 +78,10 @@ def registrar_ganador():
         }), 400
     
     # Verificar si ya existe un ganador con esa cédula en este evento
-    # (a menos que el evento permita reganar)
-    if not evento.permite_reganar:
+    # (a menos que el evento permita reganar o se fuerce el registro)
+    force = data.get('force', False)
+    
+    if not evento.permite_reganar and not force:
         ganador_existente = Ganador.query.filter_by(
             ci=ci,
             evento_id=evento_id
@@ -88,6 +90,7 @@ def registrar_ganador():
         if ganador_existente:
             return jsonify({
                 "status": "error",
+                "type": "DUPLICATE_WINNER",
                 "message": f"El funcionario con CI {ci} ya fue registrado como ganador en este evento."
             }), 400
     
